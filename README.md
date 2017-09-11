@@ -1,4 +1,6 @@
-user-and-group## API
+Simple REST service to manage user and group (ldap backend) using Python and Flask-RESTful library
+
+## API
 
 ```
 Group
