@@ -10,6 +10,7 @@ class Group1(Resource):
         if group_id:
             return group_id
         return ['admin', 'dev', 'paylink']
+    
     def put(self, group_id=None):
         if group_id:
             return "new " + group_id
