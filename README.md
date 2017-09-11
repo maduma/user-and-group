@@ -10,7 +10,7 @@ Group
 
 
 User
-- search all users (ldap filter): Get /users?filter=(uid=snsak*)
+- search all ldap users (ldap filter): Get /ldapusers?filter=(uid=snsak*)
 - get all users that belong to a least one group: GET /users
 - get user information (key: uid) : GET /users/<userId>
 - list group that the user belong to : GET /users/<userId>/groups
