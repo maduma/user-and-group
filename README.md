@@ -35,7 +35,7 @@ git clone https://github.com/maduma/user-and-group.git
 ```
 - Create a new python environment and install the requirement
 ```
-virtuelenv venv
+virtualenv venv
 source venv/bin/activate
 pip install -r user-and-group/requirement.txt
 ```
