@@ -1,3 +1,4 @@
+```
 Group
 - create : POST /groups
 - delete (must be empty) : DELETE /groups/<groupdId>
@@ -18,3 +19,4 @@ User
 Auth:
 - /login (return a session token)
 - /logout
+```
