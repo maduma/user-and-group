@@ -1,3 +1,5 @@
+user-and-group## API
+
 ```
 Group
 - create : POST /groups
@@ -20,3 +22,26 @@ Auth:
 - /login (return a session token)
 - /logout
 ```
+
+## How to start the backend server
+- Install python and pip (python package manager)
+- Install virtual env
+```
+pip install virtualenv
+```
+- clone the repo
+```
+git clone https://github.com/maduma/user-and-group.git
+```
+- Create a new python environment and install the requirement
+```
+virtuelenv venv
+source venv/bin/activate
+pip install -r user-and-group/requirement.txt
+```
+- start the server
+```
+cd user-and-group
+python api.py
+```
+
