@@ -6,7 +6,6 @@ api = Api(app)
 
 class Group1(Resource):
     def get(self, group_id=None):
-        print(self.endpoint)
         if group_id:
             return group_id
         return ['admin', 'dev', 'paylink']
