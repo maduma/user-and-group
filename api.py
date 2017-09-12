@@ -1,12 +1,28 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 import uuid
+from flask_login import LoginManager, login_required, UserMixin, login_manager
 
 app = Flask(__name__)
 api = Api(app)
 
-auth = {}
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+token = None
 groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig']}
+
+class User(UserMixin):
+    def __init__(self, user_id):
+        self.id = user_id
+    def get_id(self):
+        return id
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    if token == request.headers.get('token'):
+        return User('snsakala')
+    return None
 
 class Group1(Resource):
     def get(self, group_id=None):
@@ -16,12 +32,14 @@ class Group1(Resource):
             return { 'message': 'cannot find group ' + group_id}, 404
         return groups.keys()
     
+    @login_required
     def put(self, group_id=None):
         if group_id:
             groups[group_id] = []
             return { 'message': group_id + ' created'}
         return { 'message': 'Please provide a groupId'}, 400
 
+    @login_required
     def delete(self, group_id=None):
         if not group_id:
             return { 'message': 'please provide group_id' }
@@ -39,6 +57,7 @@ class Group2(Resource):
         return { 'message': 'cannot find group ' + group_id}, 404
 
 class Group3(Resource):
+    @login_required
     def put(self, group_id, user_id):
         if group_id in groups:
             if user_id not in groups[group_id]:
@@ -47,6 +66,7 @@ class Group3(Resource):
             return { 'message': 'user already in group'}
         return { 'message': 'cannot find group ' + group_id}, 404
 
+    @login_required
     def delete(self, group_id, user_id):
         if group_id in groups:
             if user_id in groups[group_id]:
@@ -92,14 +112,15 @@ class Login(Resource):
     def post(self):
         args = self.parser.parse_args()
         if args['username'] == 'snsakala' and args['password'] == 'Luxair123':
-            auth['username'] = args['username']
-            auth['token'] = str(uuid.uuid4())
-            return auth['token']
-        return { 'message': 'access denied'}, 403
+            global token
+            token = str(uuid.uuid4())
+            return {'token': token}
+        return {'message': 'access denied'}, 403
 
 class Logout(Resource):
     def get(self):
-        auth = {}
+        global token
+        token = None
         return { 'message': 'logged out'}
 
 api.add_resource(Group1, '/groups', '/groups/<string:group_id>')
@@ -108,39 +129,6 @@ api.add_resource(Group3, '/groups/<string:group_id>/users/<string:user_id>')
 api.add_resource(Users1, '/users')
 api.add_resource(Users2, '/users/<string:user_id>')
 api.add_resource(Users3, '/users/<string:user_id>/groups')
-api.add_resource(Login, '/login')
-api.add_resource(Logout, '/logout')
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-class Users(Resource):
-    def get(self):
-        return ['snsakala', 'ckeonig', 'mgrof']
-
-class Login(Resource):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('username', required=True)
-    parser.add_argument('password', required=True)
-
-    def post(self):
-        args = self.parser.parse_args()
-        if args['username'] == 'snsakala' and args['password'] == 'Luxair123':
-            auth['username'] = args['username']
-            auth['token'] = str(uuid.uuid4())
-            return auth['token']
-        return { 'message': 'access denied'}, 403
-
-class Logout(Resource):
-    def get(self):
-        auth = {}
-        return { 'message': 'logged out'}
-
-api.add_resource(Group1, '/groups', '/groups/<string:group_id>')
-api.add_resource(Group2, '/groups/<string:group_id>/users')
-api.add_resource(Group3, '/groups/<string:group_id>/users/<string:user_id>')
-api.add_resource(Users, '/users')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 
