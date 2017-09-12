@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 import uuid
-from flask_login import LoginManager, login_required, UserMixin #, login_manager
+from flask_login import LoginManager, login_required, UserMixin
 
 app = Flask(__name__)
 api = Api(app)
