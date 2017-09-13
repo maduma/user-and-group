@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
-import uuid
-from flask_login import LoginManager, login_required, UserMixin
+from flask_login import LoginManager, login_required
+import login
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -9,23 +10,13 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-token = None
-groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig']}
-
-
-class User(UserMixin):
-    def __init__(self, user_id):
-        self.id = user_id
-
-    def get_id(self):
-        return id
-
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    if token == request.headers.get('token'):
-        return User('snsakala')
-    return None
+    return login.load_user_from_token(request)
+
+
+groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig']}
 
 
 class Group1(Resource):
@@ -49,9 +40,9 @@ class Group2(Resource):
         if group_id in groups:
             if len(groups[group_id]) == 0:
                 groups.pop(group_id)
-                return {'message': 'group delete'}
-            return {'message': 'group not empty'}, 400
-        return {'message': 'group not existing'}
+                return {'message': 'group deleted'}
+            return {'message': 'group not empty'}, 403
+        return {'message': 'group not existing'}, 404
 
 
 class Group3(Resource):
@@ -68,7 +59,7 @@ class Group4(Resource):
             if user_id not in groups[group_id]:
                 groups[group_id].append(user_id)
                 return groups[group_id]
-            return {'message': 'user already in group'}
+            return {'message': 'user already in group'}, 403
         return {'message': 'cannot find group ' + group_id}, 404
 
     @login_required
@@ -120,18 +111,18 @@ class Login(Resource):
 
     def post(self):
         args = self.parser.parse_args()
-        if args['username'] == 'snsakala' and args['password'] == 'Luxair123':
-            global token
-            token = str(uuid.uuid4())
-            return {'token': token}
+        token = login.login(args['username'], args['password'])
+        if token:
+            return token
         return {'message': 'access denied'}, 403
 
 
 class Logout(Resource):
+    @login_required
     def get(self):
-        global token
-        token = None
-        return {'message': 'logged out'}
+        if login.logout(request):
+            return {'message': 'logged out successfully'}
+        return {'message': 'error during logout'}, 500
 
 
 api.add_resource(Group1, '/groups')
