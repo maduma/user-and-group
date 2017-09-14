@@ -44,11 +44,11 @@ class Group4(Resource):
     @login_required
     def put(self, group_id, user_id):
         return ldap.add_user_in_group(user_id, group_id)
-        
+
     @login_required
     def delete(self, group_id, user_id):
-        return ldap.delete_user_from_group(user_if, group_id)
-        
+        return ldap.delete_user_from_group(user_id, group_id)
+
 
 class Users1(Resource):
     def get(self):

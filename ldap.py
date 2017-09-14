@@ -26,7 +26,7 @@ def delete_group(group_id):
         return {'message': 'group not empty'}, 403
     return {'message': 'group not existing'}, 404
 
- 
+
 def get_group_users(group_id):
     if group_id in groups:
         return groups[group_id]
