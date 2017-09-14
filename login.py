@@ -23,10 +23,12 @@ def login(username,  password):
         token = str(uuid.uuid4())
         tokens[token] = 'snsakala'
         return {'token': token}
+    return {'message': 'access denied'}, 403
 
 
 def logout(request):
     token = request.headers.get('token')
     if token:
         del tokens[token]
-        return True
+        return {'message': 'logged out successfully'}
+    return {'message': 'cannot found the token'}, 500

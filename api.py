@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from flask_login import LoginManager, login_required
 import login
+import ldap
 
 
 app = Flask(__name__)
@@ -16,91 +17,52 @@ def load_user_from_request(request):
     return login.load_user_from_token(request)
 
 
-groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig']}
-
-
 class Group1(Resource):
     def get(self):
-        return list(groups.keys())
+        return ldap.get_groups()
 
 
 class Group2(Resource):
     def get(self, group_id):
-        if group_id in groups:
-            return {group_id: groups[group_id]}
-        return {'message': 'cannot find group ' + group_id}, 404
+        return ldap.get_group(group_id)
 
     @login_required
     def put(self, group_id):
-        groups[group_id] = []
-        return {'message': group_id + ' created'}
+        return ldap.create_group(group_id)
 
     @login_required
     def delete(self, group_id):
-        if group_id in groups:
-            if len(groups[group_id]) == 0:
-                groups.pop(group_id)
-                return {'message': 'group deleted'}
-            return {'message': 'group not empty'}, 403
-        return {'message': 'group not existing'}, 404
+        return ldap.delete_group(group_id)
 
 
 class Group3(Resource):
     def get(self, group_id):
-        if group_id in groups:
-            return groups[group_id]
-        return {'message': 'cannot find group ' + group_id}, 404
+        return ldap.get_group_users(group_id)
 
 
 class Group4(Resource):
     @login_required
     def put(self, group_id, user_id):
-        if group_id in groups:
-            if user_id not in groups[group_id]:
-                groups[group_id].append(user_id)
-                return groups[group_id]
-            return {'message': 'user already in group'}, 403
-        return {'message': 'cannot find group ' + group_id}, 404
-
+        return ldap.add_user_in_group(user_id, group_id)
+        
     @login_required
     def delete(self, group_id, user_id):
-        if group_id in groups:
-            if user_id in groups[group_id]:
-                groups[group_id].remove(user_id)
-                return {'message': 'user removed from group'}
-            return {'message': 'cannot find user' + user_id}, 404
-        return {'message': 'cannot find group' + group_id}, 404
-
+        return ldap.delete_user_from_group(user_if, group_id)
+        
 
 class Users1(Resource):
     def get(self):
-        users = []
-        for group_id in groups:
-            for user_id in groups[group_id]:
-                if user_id not in users:
-                    users.append(user_id)
-        return users
+        return ldap.get_users()
 
 
 class Users2(Resource):
     def get(self, user_id):
-        users = []
-        for group_id in groups:
-            for user in groups[group_id]:
-                if user not in users:
-                    users.append(user)
-        if user_id in users:
-            return user_id
-        return {'message': 'cannot find user'}, 404
+        return ldap.get_user(user_id)
 
 
 class Users3(Resource):
     def get(self, user_id):
-        user_groups = []
-        for group_id in groups:
-            if user_id in groups[group_id]:
-                user_groups.append(group_id)
-        return user_groups
+        return ldap.get_user_groups(user_id)
 
 
 class Login(Resource):
@@ -111,18 +73,13 @@ class Login(Resource):
 
     def post(self):
         args = self.parser.parse_args()
-        token = login.login(args['username'], args['password'])
-        if token:
-            return token
-        return {'message': 'access denied'}, 403
+        return login.login(args['username'], args['password'])
 
 
 class Logout(Resource):
     @login_required
     def get(self):
-        if login.logout(request):
-            return {'message': 'logged out successfully'}
-        return {'message': 'error during logout'}, 500
+        return login.logout(request)
 
 
 api.add_resource(Group1, '/groups')
