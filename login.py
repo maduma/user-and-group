@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 import uuid
+import ldap
 
 tokens = {}
 
@@ -9,26 +10,22 @@ class User(UserMixin):
         self.id = user_id
 
     def get_id(self):
-        return id
+        return self.id
 
 
-def load_user_from_token(request):
-    token = request.headers.get('token')
+def load_user_from_token(token):
     if token in tokens:
         return User(tokens[token])
 
 
 def login(username,  password):
-    if username == 'snsakala' and password == 'Luxair123':
+    if ldap.check_password(username, password):
         token = str(uuid.uuid4())
-        tokens[token] = 'snsakala'
+        tokens[token] = username
         return {'token': token}
     return {'message': 'access denied'}, 403
 
 
-def logout(request):
-    token = request.headers.get('token')
-    if token:
-        del tokens[token]
-        return {'message': 'logged out successfully'}
-    return {'message': 'cannot found the token'}, 500
+def logout(token):
+    del tokens[token]
+    return {'message': 'logged out successfully'}

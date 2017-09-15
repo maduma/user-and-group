@@ -14,7 +14,8 @@ login_manager.init_app(app)
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    return login.load_user_from_token(request)
+    token = request.headers.get('token')
+    return login.load_user_from_token(token)
 
 
 class Group1(Resource):
@@ -79,7 +80,8 @@ class Login(Resource):
 class Logout(Resource):
     @login_required
     def get(self):
-        return login.logout(request)
+        token = request.headers.get('token')
+        return login.logout(token)
 
 
 api.add_resource(Group1, '/groups')
