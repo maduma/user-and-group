@@ -47,3 +47,9 @@ cd user-and-group
 python api.py
 ```
 
+- install local openldap for test
+```
+sudo apt install slapd ldap-utils
+sudo service slapd start
+```
+

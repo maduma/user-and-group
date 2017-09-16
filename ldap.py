@@ -1,5 +1,15 @@
+import ldap
+
+
+LDAP_URL = 'ldap://localhost:389'
+
+
 def check_password(username, password):
-    pass
+    ldap_conn = ldap.initialize(LDAP_URL)
+    # find the user dn
+    dn = ''
+    # try to bind
+    ldap_conn.simple_bind(dn, password)
 
 
 def get_groups():
