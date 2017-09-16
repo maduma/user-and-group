@@ -77,3 +77,7 @@ def _do_complex_ldap_search():
     results = conn.search_s('o=test', ldap.SCOPE_SUBTREE, '(|(cn=b*b)(cn=a*e))')
 
     return results
+    
+
+if __name__ == '__main__':
+    unittest.main()

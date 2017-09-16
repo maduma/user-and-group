@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from flask_login import LoginManager, login_required
 import login
-import ldap
+import ldap_backend
 
 
 app = Flask(__name__)
@@ -20,50 +20,50 @@ def load_user_from_request(request):
 
 class Group1(Resource):
     def get(self):
-        return ldap.get_groups()
+        return ldap_backend.get_groups()
 
 
 class Group2(Resource):
     def get(self, group_id):
-        return ldap.get_group(group_id)
+        return ldap_backend.get_group(group_id)
 
     @login_required
     def put(self, group_id):
-        return ldap.create_group(group_id)
+        return ldap_backend.create_group(group_id)
 
     @login_required
     def delete(self, group_id):
-        return ldap.delete_group(group_id)
+        return ldap_backend.delete_group(group_id)
 
 
 class Group3(Resource):
     def get(self, group_id):
-        return ldap.get_group_users(group_id)
+        return ldap_backend.get_group_users(group_id)
 
 
 class Group4(Resource):
     @login_required
     def put(self, group_id, user_id):
-        return ldap.add_user_in_group(user_id, group_id)
+        return ldap_backend.add_user_in_group(user_id, group_id)
 
     @login_required
     def delete(self, group_id, user_id):
-        return ldap.delete_user_from_group(user_id, group_id)
+        return ldap_backend.delete_user_from_group(user_id, group_id)
 
 
 class Users1(Resource):
     def get(self):
-        return ldap.get_users()
+        return ldap_backend.get_users()
 
 
 class Users2(Resource):
     def get(self, user_id):
-        return ldap.get_user(user_id)
+        return ldap_backend.get_user(user_id)
 
 
 class Users3(Resource):
     def get(self, user_id):
-        return ldap.get_user_groups(user_id)
+        return ldap_backend.get_user_groups(user_id)
 
 
 class Login(Resource):

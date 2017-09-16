@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 import uuid
-import ldap
+import ldap_backend
 
 tokens = {}
 
@@ -19,7 +19,7 @@ def load_user_from_token(token):
 
 
 def login(username,  password):
-    if ldap.check_password(username, password):
+    if ldap_backend.check_password(username, password):
         token = str(uuid.uuid4())
         tokens[token] = username
         return {'token': token}
