@@ -18,7 +18,7 @@ def create_group(group_id):
     if group_id in groups:
         return {'message': group_id + ' already exists'}, 500
     groups[group_id] = []
-    return {'message': group_id + ' created'}
+    return {'message': 'group ' + group_id + ' created'}
 
 
 def delete_group(group_id):

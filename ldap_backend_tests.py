@@ -8,8 +8,8 @@ from mockldap import MockLdap
 class LdapBackendTest(unittest.TestCase):
     top = ('o=test', {'o': ['test']})
     example = ('ou=example,o=test', {'ou': ['example']})
-    people = ('ou=people,ou=example,o=test', {'ou': ['other']})
-    group = ('ou=group,ou=example,o=test', {'ou': ['other']})
+    people = ('ou=people,ou=example,o=test', {'ou': ['people']})
+    group = ('ou=group,ou=example,o=test', {'ou': ['group']})
     admin = ('cn=admin,ou=group,ou=example,o=test', {'cn': ['admin'], 'uniqueMember': [
         'uid=alice,ou=people,ou=example,o=test',
         'uid=bob,ou=people,ou=example,o=test',
@@ -40,26 +40,62 @@ class LdapBackendTest(unittest.TestCase):
     def test_sucessfull_search_and_bind(self):
         results = ldap_backend.check_password('alice', 'alicepw')
         self.assertEquals(results, True)
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'simple_bind_s'])
         
     def test_cannot_find_user(self):
         results = ldap_backend.check_password('noone', 'alicepw')
         self.assertEquals(results, False)
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_bad_password(self):
         results = ldap_backend.check_password('alice', 'badpassword')
         self.assertEquals(results, False)
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'simple_bind_s'])
         
     def test_get_groups(self):
         results = ldap_backend.get_groups()
         self.assertEquals(sorted(results), ['admin', 'paylink'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_get_group(self):
         results = ldap_backend.get_group('admin')
         self.assertEquals(results, {'admin': ['alice', 'bob']})
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_get_group_not_found(self):
         results = ldap_backend.get_group('nogroup')
         self.assertEquals(results, ({'message': 'cannot find group nogroup'}, 404))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+    
+    def test_create_group_already_exists(self):
+        results = ldap_backend.create_group('admin')
+        self.assertEquals(results, ({'message': 'group admin already exists'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    def test_create_group(self):
+        results = ldap_backend.create_group('newgroup')
+        self.assertEquals(results, {'message': 'group newgroup created'})
+        self.assertEquals(self.ldapobj.bound_as, 'cn=manager,ou=example,o=test')
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'simple_bind_s', 'add_s'])
+        self.assertIn('cn=newgroup,ou=group,ou=example,o=test', self.ldapobj.directory)
+    
+    def test_delete_group_not_exists(self):
+        results = ldap_backend.delete_group('nogroup')
+        self.assertEquals(results, ({'message': 'cannot find group nogroup'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+    
+    def test_delete_group_not_empty(self):
+        results = ldap_backend.delete_group('admin')
+        self.assertEquals(results, ({'message': 'group admin not empty'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    def test_delete_group(self):
+        results = ldap_backend.delete_group('paylink')
+        self.assertEquals(results, {'message': 'group paylink deleted'})
+        self.assertEquals(self.ldapobj.bound_as, 'cn=manager,ou=example,o=test')
+        self.assertEquals(self.ldapobj.methods_called(), [
+            'initialize', 'search_s', 'simple_bind_s', 'delete_s'])
+        self.assertNotIn('cn=paylink,ou=group,ou=example,o=test', self.ldapobj.directory)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
 import unittest
 from mock import patch
 from login import login, load_user_from_token, logout
-from mock_ldap import check_password
+from mock_ldap_backend import check_password
 
 class TestLoginMethods(unittest.TestCase):
 

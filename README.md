@@ -37,6 +37,7 @@ git clone https://github.com/maduma/user-and-group.git
 ```
 - Create a new python environment and install the requirement
 ```
+sudo apt-get install libsasl2-dev python-dev libldap2-dev libssl-dev
 virtualenv venv
 source venv/bin/activate
 pip install -r user-and-group/requirement.txt
@@ -53,3 +54,7 @@ sudo apt install slapd ldap-utils
 sudo service slapd start
 ```
 
+- run unit tests suite
+```
+python test.py
+```
