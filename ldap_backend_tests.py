@@ -14,12 +14,17 @@ class LdapBackendTest(unittest.TestCase):
         'uid=alice,ou=people,ou=example,o=test',
         'uid=bob,ou=people,ou=example,o=test',
         ]})
-    paylink = ('cn=paylink,ou=group,ou=example,o=test', {'cn': ['paylink']})
+    paylink = ('cn=paylink,ou=group,ou=example,o=test', {'cn': ['paylink'], 'uniqueMember': [
+        'uid=bob,ou=people,ou=example,o=test',
+        'uid=jeff,ou=people,ou=example,o=test',
+        ]})
+    dev = ('cn=dev,ou=group,ou=example,o=test', {'cn': ['dev']})
     manager = ('cn=manager,ou=example,o=test', {'cn': ['manager'], 'userPassword': ['ldaptest']})
     alice = ('uid=alice,ou=people,ou=example,o=test', {'uid': ['alice'], 'userPassword': ['alicepw']})
     bob = ('uid=bob,ou=people,ou=example,o=test', {'uid': ['bob'], 'userPassword': ['bobpw']})
+    jeff = ('uid=jeff,ou=people,ou=example,o=test', {'uid': ['jeff'], 'userPassword': ['jeffpw']})
 
-    directory = dict([top, example, people, group, admin, paylink, manager, alice, bob])
+    directory = dict([top, example, people, group, admin, paylink, dev, manager, alice, bob, jeff])
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +59,7 @@ class LdapBackendTest(unittest.TestCase):
         
     def test_get_groups(self):
         results = ldap_backend.get_groups()
-        self.assertEquals(sorted(results), ['admin', 'paylink'])
+        self.assertEquals(sorted(results), ['admin', 'dev', 'paylink'])
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_get_group(self):
@@ -90,12 +95,24 @@ class LdapBackendTest(unittest.TestCase):
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_delete_group(self):
-        results = ldap_backend.delete_group('paylink')
-        self.assertEquals(results, {'message': 'group paylink deleted'})
+        results = ldap_backend.delete_group('dev')
+        self.assertEquals(results, {'message': 'group dev deleted'})
         self.assertEquals(self.ldapobj.bound_as, 'cn=manager,ou=example,o=test')
         self.assertEquals(self.ldapobj.methods_called(), [
             'initialize', 'search_s', 'simple_bind_s', 'delete_s'])
-        self.assertNotIn('cn=paylink,ou=group,ou=example,o=test', self.ldapobj.directory)
+        self.assertNotIn('cn=dev,ou=group,ou=example,o=test', self.ldapobj.directory)
+
+    def test_get_group_users_group_not_found(self):
+        results = ldap_backend.get_group_users('notthere')
+        self.assertEquals(results, ({'message': 'cannot find group notthere'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    
+
+    def test_get_group_users(self):
+        results = ldap_backend.get_group_users('paylink')
+        self.assertEquals(sorted(results), ['bob', 'jeff'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
 
 if __name__ == '__main__':
     unittest.main()

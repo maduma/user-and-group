@@ -75,8 +75,15 @@ def delete_group(group_id):
     
 
 def get_group_users(group_id):
-    pass
-
+    conn = ldap.initialize(LDAP_URL)
+    filter = '(cn=' + group_id + ')'
+    results = conn.search_s(GROUP_DN, ldap.SCOPE_ONELEVEL, filter)
+    if len(results) != 1:
+        return {'message': 'cannot find group ' + group_id}, 403
+    attrs = results[0][1]
+    if 'uniqueMember' not in attrs:
+        pass
+    return [x.split(',')[0].split('=')[1] for x in attrs['uniqueMember']]
 
 def add_user_in_group(user_id, group_id):
     pass
