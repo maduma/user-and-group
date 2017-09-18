@@ -138,5 +138,10 @@ class LdapBackendTest(unittest.TestCase):
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'modify_s'])
         self.assertIn('uid=alice,ou=people,ou=example,o=test', self.ldapobj.directory['cn=paylink,ou=group,ou=example,o=test']['uniqueMember'])
         
+    def test_delete_user_from_group_group_not_found(self):
+        results = ldap_backend.delete_user_from_group('alice', 'notthere')
+        self.assertEquals(results, ({'message': 'cannot find group notthere'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
 if __name__ == '__main__':
     unittest.main()
