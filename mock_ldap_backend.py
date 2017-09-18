@@ -40,7 +40,7 @@ def add_user_in_group(user_id, group_id):
     if group_id in groups:
         if user_id not in groups[group_id]:
             groups[group_id].append(user_id)
-            return groups[group_id]
+            return {'message': 'user ' + user_id + ' added in group ' + group_id}
         return {'message': 'user already in group'}, 403
     return {'message': 'cannot find group ' + group_id}, 404
 

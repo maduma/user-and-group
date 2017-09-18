@@ -86,7 +86,28 @@ def get_group_users(group_id):
     return [x.split(',')[0].split('=')[1] for x in attrs['uniqueMember']]
 
 def add_user_in_group(user_id, group_id):
-    pass
+    conn = ldap.initialize(LDAP_URL)
+
+    filter = '(cn=' + group_id + ')'
+    results = conn.search_s(GROUP_DN, ldap.SCOPE_ONELEVEL, filter)
+    if len(results) != 1:
+        return {'message': 'cannot find group ' + group_id}, 403
+    group_dn = results[0][0]
+    group_attrs = results[0][1]
+
+    filter = '(uid=' + user_id + ')'
+    results = conn.search_s(BASE_DN, ldap.SCOPE_SUBTREE, filter)
+    if len(results) != 1:
+        return {'message': 'cannot find user ' + user_id}, 403
+    user_dn = results[0][0]
+
+    if 'uniqueMember' in group_attrs and user_dn in group_attrs['uniqueMember']:
+        return {'message': 'user ' + user_id + ' already in group ' + group_id}, 403
+        
+    mod_attrs = [(ldap.MOD_ADD, 'uniqueMember', user_dn)]
+    conn.modify_s(group_dn, mod_attrs)
+    return {'message': 'user ' + user_id + ' added in group ' + group_id}
+    
 
 
 def delete_user_from_group(user_id, group_id):

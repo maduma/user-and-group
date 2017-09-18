@@ -116,9 +116,27 @@ class LdapBackendTest(unittest.TestCase):
         results = ldap_backend.get_group_users('paylink')
         self.assertEquals(sorted(results), ['bob', 'jeff'])
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+    
+    def test_add_user_in_group_group_not_found(self):
+        results = ldap_backend.add_user_in_group('alice', 'notthere')
+        self.assertEquals(results, ({'message': 'cannot find group notthere'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
+    def test_add_user_in_group_user_not_found(self):
+        results = ldap_backend.add_user_in_group('nouser', 'paylink')
+        self.assertEquals(results, ({'message': 'cannot find user nouser'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+        
+    def test_add_user_in_group_user_already_in(self):
+        results = ldap_backend.add_user_in_group('bob', 'paylink')
+        self.assertEquals(results, ({'message': 'user bob already in group paylink'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+    
     def test_add_user_in_group(self):
         results = ldap_backend.add_user_in_group('alice', 'paylink')
+        self.assertEquals(results, {'message': 'user alice added in group paylink'})
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'modify_s'])
+        self.assertIn('uid=alice,ou=people,ou=example,o=test', self.ldapobj.directory['cn=paylink,ou=group,ou=example,o=test']['uniqueMember'])
         
 if __name__ == '__main__':
     unittest.main()
