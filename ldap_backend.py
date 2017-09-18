@@ -126,6 +126,13 @@ def delete_user_from_group(user_id, group_id):
         return {'message': 'cannot find user ' + user_id}, 403
     user_dn = results[0][0]
 
+    if 'uniqueMember' in group_attrs and user_dn not in group_attrs['uniqueMember']:
+        return {'message': 'user ' + user_id + ' not in group ' + group_id}, 403
+    
+    mod_attrs = [(ldap.MOD_DELETE, 'uniqueMember', user_dn)]
+    conn.modify_s(group_dn, mod_attrs)
+    return {'message': 'user ' + user_id + ' removed from group ' + group_id}
+
 
 def find_ldap_users(filter):
     pass

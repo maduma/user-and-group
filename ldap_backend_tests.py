@@ -143,5 +143,21 @@ class LdapBackendTest(unittest.TestCase):
         self.assertEquals(results, ({'message': 'cannot find group notthere'}, 403))
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
+    def test_delete_user_from_group_user_not_found(self):
+        results = ldap_backend.delete_user_from_group('noone', 'paylink')
+        self.assertEquals(results, ({'message': 'cannot find user noone'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+        
+    def test_delete_user_from_group_user_not_found_in_group(self):
+        results = ldap_backend.delete_user_from_group('alice', 'paylink')
+        self.assertEquals(results, ({'message': 'user alice not in group paylink'}, 403))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+    
+    def test_delete_user_from_group(self):
+        results = ldap_backend.delete_user_from_group('jeff', 'paylink')
+        self.assertEquals(results, {'message': 'user jeff removed from group paylink'})
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'modify_s'])
+        self.assertNotIn('uid=jeff,ou=people,ou=example,o=test', self.ldapobj.directory['cn=paylink,ou=group,ou=example,o=test']['uniqueMember'])
+        
 if __name__ == '__main__':
     unittest.main()
