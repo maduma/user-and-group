@@ -1,5 +1,6 @@
 import ldap
 import ldap.modlist
+from itertools import chain
 
 
 LDAP_URL = 'ldap://localhost/'
@@ -103,7 +104,12 @@ def add_user_in_group(user_id, group_id):
 
     if 'uniqueMember' in group_attrs and user_dn in group_attrs['uniqueMember']:
         return {'message': 'user ' + user_id + ' already in group ' + group_id}, 403
-        
+    
+    try:
+        conn.simple_bind_s(MANAGER_DN, MANAGER_PASS)
+    except ldap.INVALID_CREDENTIALS:
+        return {'message': 'manager invalid credetials'}, 403
+    
     mod_attrs = [(ldap.MOD_ADD, 'uniqueMember', user_dn)]
     conn.modify_s(group_dn, mod_attrs)
     return {'message': 'user ' + user_id + ' added in group ' + group_id}
@@ -129,6 +135,11 @@ def delete_user_from_group(user_id, group_id):
     if 'uniqueMember' in group_attrs and user_dn not in group_attrs['uniqueMember']:
         return {'message': 'user ' + user_id + ' not in group ' + group_id}, 403
     
+    try:
+        conn.simple_bind_s(MANAGER_DN, MANAGER_PASS)
+    except ldap.INVALID_CREDENTIALS:
+        return {'message': 'manager invalid credetials'}, 403
+    
     mod_attrs = [(ldap.MOD_DELETE, 'uniqueMember', user_dn)]
     conn.modify_s(group_dn, mod_attrs)
     return {'message': 'user ' + user_id + ' removed from group ' + group_id}
@@ -139,12 +150,21 @@ def find_ldap_users(filter):
 
 
 def get_users():
-    pass
+    conn = ldap.initialize(LDAP_URL)
+    results = conn.search_s(GROUP_DN, ldap.SCOPE_ONELEVEL, '(cn=*)')
+    # get all non-empty uniqueMember of all groups (list of list), flattern the list and get only unique value
+    users_dn = set(list(chain.from_iterable(filter(lambda x: x, [x[1].get('uniqueMember') for x in results]))))
+    users = [x.split(',')[0].split('=')[1] for x in users_dn]
+    return users
 
 
 def get_user(user_id):
-    pass
-
+    conn = ldap.initialize(LDAP_URL)
+    filter = '(uid=' + user_id + ')'
+    results = conn.search_s(BASE_DN, ldap.SCOPE_SUBTREE, filter)
+    if len(results) != 1:
+        return {'message': 'cannot find user ' + user_id}, 404
+    return results[0][1]['uid']
 
 def get_user_groups(user_id):
     pass

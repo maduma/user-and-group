@@ -135,7 +135,8 @@ class LdapBackendTest(unittest.TestCase):
     def test_add_user_in_group(self):
         results = ldap_backend.add_user_in_group('alice', 'paylink')
         self.assertEquals(results, {'message': 'user alice added in group paylink'})
-        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'modify_s'])
+        self.assertEquals(self.ldapobj.bound_as, 'cn=manager,ou=example,o=test')
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'simple_bind_s', 'modify_s'])
         self.assertIn('uid=alice,ou=people,ou=example,o=test', self.ldapobj.directory['cn=paylink,ou=group,ou=example,o=test']['uniqueMember'])
         
     def test_delete_user_from_group_group_not_found(self):
@@ -156,8 +157,25 @@ class LdapBackendTest(unittest.TestCase):
     def test_delete_user_from_group(self):
         results = ldap_backend.delete_user_from_group('jeff', 'paylink')
         self.assertEquals(results, {'message': 'user jeff removed from group paylink'})
-        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'modify_s'])
+        self.assertEquals(self.ldapobj.bound_as, 'cn=manager,ou=example,o=test')
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'simple_bind_s', 'modify_s'])
         self.assertNotIn('uid=jeff,ou=people,ou=example,o=test', self.ldapobj.directory['cn=paylink,ou=group,ou=example,o=test']['uniqueMember'])
+        
+    def test_get_users(self):
+        results = ldap_backend.get_users()
+        self.assertEquals(sorted(results), ['alice', 'bob', 'jeff'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    def test_get_user_not_found(self):
+        results = ldap_backend.get_user('noone')
+        self.assertEquals(results, ({'message': 'cannot find user noone'}, 404))
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s']) 
+        
+    def test_get_user(self):
+        results = ldap_backend.get_user('alice')
+        self.assertEquals(results, ['alice'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s']) 
+        
         
 if __name__ == '__main__':
     unittest.main()
