@@ -174,8 +174,22 @@ class LdapBackendTest(unittest.TestCase):
     def test_get_user(self):
         results = ldap_backend.get_user('alice')
         self.assertEquals(results, ['alice'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    def test_get_user_groups_user_not_found(self):
+        results = ldap_backend.get_user_groups('noone')
+        self.assertEquals(results, ({'message': 'cannot find user noone'}, 404))
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s']) 
         
+    def test_get_user_groups(self):
+        results = ldap_backend.get_user_groups('bob')
+        self.assertEquals(sorted(results), ['admin', 'paylink'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+        
+    def test_find_ldap_users(self):
+        results = ldap_backend.find_ldap_users('(uid=alice)')
+        self.assertEquals(results, ['alice'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
 if __name__ == '__main__':
     unittest.main()

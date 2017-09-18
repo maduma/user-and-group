@@ -146,7 +146,9 @@ def delete_user_from_group(user_id, group_id):
 
 
 def find_ldap_users(filter):
-    pass
+    conn = ldap.initialize(LDAP_URL)
+    results = conn.search_s(BASE_DN, ldap.SCOPE_SUBTREE, filter)
+    return [x[1]['uid'][0] for x in results]
 
 
 def get_users():
@@ -167,4 +169,18 @@ def get_user(user_id):
     return results[0][1]['uid']
 
 def get_user_groups(user_id):
-    pass
+    conn = ldap.initialize(LDAP_URL)
+    
+    filter = '(uid=' + user_id + ')'
+    results = conn.search_s(BASE_DN, ldap.SCOPE_SUBTREE, filter)
+    if len(results) != 1:
+        return {'message': 'cannot find user ' + user_id}, 404
+    user_dn = results[0][0]
+    
+    results = conn.search_s(GROUP_DN, ldap.SCOPE_ONELEVEL, '(cn=*)')
+    groups = []
+    for entry in results:
+        members = entry[1].get('uniqueMember')
+        if members and user_dn in members:
+            groups.append(entry[0].split(',')[0].split('=')[1])
+    return groups
