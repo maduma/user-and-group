@@ -82,7 +82,7 @@ def get_group_users(group_id):
         return {'message': 'cannot find group ' + group_id}, 403
     attrs = results[0][1]
     if 'uniqueMember' not in attrs:
-        pass
+        return []
     return [x.split(',')[0].split('=')[1] for x in attrs['uniqueMember']]
 
 def add_user_in_group(user_id, group_id):

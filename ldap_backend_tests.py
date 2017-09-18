@@ -107,12 +107,19 @@ class LdapBackendTest(unittest.TestCase):
         self.assertEquals(results, ({'message': 'cannot find group notthere'}, 403))
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
-    
+    def test_get_group_users_group_empty(self):
+        results = ldap_backend.get_group_users('dev')
+        self.assertEquals(results, [])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
 
     def test_get_group_users(self):
         results = ldap_backend.get_group_users('paylink')
         self.assertEquals(sorted(results), ['bob', 'jeff'])
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
+        
+    def test_add_user_in_group(self):
+        results = ldap_backend.add_user_in_group_users('alice', paylink')
+        
 
 if __name__ == '__main__':
     unittest.main()
