@@ -1,0 +1,9 @@
+FROM ubuntu:xenial
+LABEL Description="python 2.7 + ldap library for test suite"
+
+RUN apt-get -y update \
+    && apt-get -y install libssl-dev libldap2-dev libsasl2-dev python python-pip
+
+COPY requirement.txt requirement.txt
+
+RUN pip install --no-cache-dir -r requirement.txt
