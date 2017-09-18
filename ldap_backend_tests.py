@@ -118,8 +118,6 @@ class LdapBackendTest(unittest.TestCase):
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
     def test_add_user_in_group(self):
-        results = ldap_backend.add_user_in_group_users('alice', paylink')
-        
-
+        results = ldap_backend.add_user_in_group('alice', 'paylink')
 if __name__ == '__main__':
     unittest.main()
