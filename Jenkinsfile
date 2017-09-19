@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Run Prod Image') {
             steps {
-                sh 'docker inspect user_and_group >/dev/null 2>&1 && docker rm -f user_and_group'
+                sh '[ -z "$( docker ps -q --filter name=user_and_group )" ] || docker rm -f user_and_group'
                 sh 'docker run -d -p 5000:5000 --name user_and_group user-and-group:prod'
             }
         }
