@@ -1,13 +1,15 @@
 import ldap
 import ldap.modlist
 from itertools import chain
+import os
 
 
-LDAP_URL = 'ldap://localhost/'
-BASE_DN = 'o=test'
-GROUP_DN = 'ou=group,ou=example,o=test'
-MANAGER_DN = 'cn=manager,ou=example,o=test'
-MANAGER_PASS = 'ldaptest'
+LDAP_URL = 'ldap://ldap1p.svr.luxair/'
+BASE_DN = 'ou=LuxairGroup,ou=luxair,o=luxair.lu'
+GROUP_DN = 'ou=jenkins,ou=Applications,o=luxair.lu'
+MANAGER_DN = 'uid=ldapmod,ou=Special Users,o=luxair.lu'
+MANAGER_PASS = os.environ.get('LDAP_MANAGER_PASS', 'invalidcredential')
+
 
 def check_password(username, password):
     conn = ldap.initialize(LDAP_URL)
@@ -52,7 +54,8 @@ def create_group(group_id):
     except ldap.INVALID_CREDENTIALS:
         return {'message': 'manager invalid credetials'}, 403
     dn = 'cn=' + group_id + ',' + GROUP_DN
-    attr = {'cn': [group_id]}
+    group_id = str(group_id) # python-ldap do not like unicode, change it to string
+    attr = {'cn': group_id, 'objectClass': ['top', 'groupOfUniqueNames']}
     ldif = ldap.modlist.addModlist(attr)
     conn.add_s(dn, ldif)
     return {'message': 'group ' + group_id + ' created'}

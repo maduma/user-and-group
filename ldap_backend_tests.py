@@ -4,6 +4,11 @@ import ldap_backend
 
 from mockldap import MockLdap
 
+ldap_backend.LDAP_URL = 'ldap://localhost/'
+ldap_backend.BASE_DN = 'o=test'
+ldap_backend.GROUP_DN = 'ou=group,ou=example,o=test'
+ldap_backend.MANAGER_DN = 'cn=manager,ou=example,o=test'
+ldap_backend.MANAGER_PASS = 'ldaptest'
 
 class LdapBackendTest(unittest.TestCase):
     top = ('o=test', {'o': ['test']})
