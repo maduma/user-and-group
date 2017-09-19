@@ -47,20 +47,25 @@ class LdapBackendTest(unittest.TestCase):
         self.mockldap.stop()
         del self.ldapobj
 
-    def test_sucessfull_search_and_bind(self):
+    def test_check_password_user_not_in_admin_group(self):
+        results = ldap_backend.check_password('jeff', 'jeffpw')
+        self.assertEquals(results, False)
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s'])
+
+    def test_check_password_sucessfull_search_and_bind(self):
         results = ldap_backend.check_password('alice', 'alicepw')
         self.assertEquals(results, True)
-        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'simple_bind_s'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'simple_bind_s'])
         
-    def test_cannot_find_user(self):
+    def test_check_password_cannot_find_user(self):
         results = ldap_backend.check_password('noone', 'alicepw')
         self.assertEquals(results, False)
         self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s'])
         
-    def test_bad_password(self):
+    def test_check_password_bad_password(self):
         results = ldap_backend.check_password('alice', 'badpassword')
         self.assertEquals(results, False)
-        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'simple_bind_s'])
+        self.assertEquals(self.ldapobj.methods_called(), ['initialize', 'search_s', 'search_s', 'simple_bind_s'])
         
     def test_get_groups(self):
         results = ldap_backend.get_groups()

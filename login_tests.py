@@ -12,12 +12,12 @@ class TestLoginMethods(unittest.TestCase):
         self.assertEqual(user.get_id(), 'snsakala')
 
     @patch('login.ldap_backend.check_password', side_effect=check_password)
-    def test_bad_login(self, login_function):
+    def test_check_password_bad_login(self, login_function):
         message = login('snsakala', 'badpass')
         self.assertEqual(message, ({'message': 'access denied'}, 403))
     
     @patch('login.ldap_backend.check_password', side_effect=check_password)
-    def test_good_login(self, login_function):
+    def test_check_password_good_login(self, login_function):
         token = login('snsakala', 'Luxair123')
         self.assertIn('token', token)
 

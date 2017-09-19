@@ -16,15 +16,24 @@ def check_password(username, password):
     # find the user dn
     filter = '(uid=' + username + ')'
     results = conn.search_s(BASE_DN, ldap.SCOPE_SUBTREE, filter)
-    if len(results) == 1:
-        dn = results[0][0]
-        # Try a bind
-        try:
-            results = conn.simple_bind_s(dn, password)
-            return True
-        except ldap.INVALID_CREDENTIALS:
-            return False
-    return False
+    if len(results) != 1:
+        return False
+    dn = results[0][0]
+
+    # check that the user is in admin group
+    filter = '(cn=admin)'
+    results = conn.search_s(GROUP_DN, ldap.SCOPE_ONELEVEL, filter) 
+    if len(results) != 1: # no admin group exists
+        return False
+    if dn not in results[0][1].get('uniqueMember'):
+        return False
+
+    # Try a bind
+    try:
+        results = conn.simple_bind_s(dn, password)
+        return True
+    except ldap.INVALID_CREDENTIALS:
+        return False
 
 def get_groups():
     conn = ldap.initialize(LDAP_URL)
