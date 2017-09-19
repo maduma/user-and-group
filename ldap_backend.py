@@ -26,7 +26,7 @@ def check_password(username, password):
     if len(results) != 1: # no admin group exists
         return False
     if dn not in results[0][1].get('uniqueMember'):
-        pass # return False
+        return False
 
     # Try a bind
     try:
