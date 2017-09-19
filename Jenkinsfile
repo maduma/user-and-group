@@ -1,8 +1,7 @@
 pipeline {
-    agent none
+    agent any
     stages {
         stage('Build Test Image') {
-            agent any
             steps {
                 sh 'docker build -f Dockerfile.test -t user-and-group:test .'
             }
@@ -20,9 +19,14 @@ pipeline {
             }
         }
         stage('Build Prod Image') {
-            agent any
             steps {
                 sh 'docker build -f Dockerfile.prod -t user-and-group:prod .'
+            }
+        }
+        stage('Run Prod Image') {
+            steps {
+                sh 'docker inspect user_and_group >/dev/null 2>&1 && docker rm -f user_and_group'
+                sh 'docker run -d -p 5000:5000 --name user_and_group user-and-group:prod'
             }
         }
     }
