@@ -1,0 +1,4 @@
+Flask==0.12.2
+Flask-RESTful==0.3.6
+Flask-Login==0.4.0
+python-ldap==2.4.44

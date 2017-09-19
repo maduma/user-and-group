@@ -1,0 +1,11 @@
+FROM ubuntu:xenial
+LABEL Description="python 2.7 + ldap library"
+
+RUN apt-get -y update \
+    && apt-get -y install libssl-dev libldap2-dev libsasl2-dev python python-pip
+
+RUN mkdir -p /app/user-and-group
+COPY api.py ldap_backend.py login.py requirement.prod.txt /app/user-and-group
+
+RUN pip install --no-cache-dir -r requirement.txt
+COPY 
