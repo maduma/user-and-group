@@ -3,6 +3,7 @@ from flask_restful import Resource, Api, reqparse
 from flask_login import LoginManager, login_required
 import login
 import ldap_backend
+import os
 
 
 app = Flask(__name__)
@@ -95,4 +96,6 @@ api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 
 if __name__ == '__main__':
+    if os.environ.get('PRODUCTION'):
+        app.run(host='0.0.0.0', debug=True)
     app.run(debug=True)
