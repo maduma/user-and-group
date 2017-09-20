@@ -66,6 +66,17 @@ class Users3(Resource):
     def get(self, user_id):
         return ldap_backend.get_user_groups(user_id)
 
+class Users4(Resource):
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('filter', required=True)
+
+    def get(self):
+        args = self.parser.parse_args()
+        substring = args['filter']
+        if len(substring) < 3:
+            return {'message': 'filter should have a least 3 char'}, 400
+        return ldap_backend.find_ldap_users('(uid=*' + substring + '*)')
 
 class Login(Resource):
 
@@ -92,6 +103,7 @@ api.add_resource(Group4, '/groups/<string:group_id>/users/<string:user_id>')
 api.add_resource(Users1, '/users')
 api.add_resource(Users2, '/users/<string:user_id>')
 api.add_resource(Users3, '/users/<string:user_id>/groups')
+api.add_resource(Users4, '/ldapusers')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 
