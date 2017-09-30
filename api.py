@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
-from flask_login import LoginManager, login_required
+from flask_login import LoginManager, login_required, current_user
 import login
 import ldap_backend
 import os

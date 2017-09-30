@@ -1,5 +1,5 @@
 passwords = {'snsakala': 'Luxair123', 'ckoenig': 'Luxair2987'}
-groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig']}
+groups = {'admin': ['snsakala', 'ckoenig'], 'dxretail': ['ckoenig', 'mgrof']}
 
 def check_password(username, password):
     return passwords[username] == password
