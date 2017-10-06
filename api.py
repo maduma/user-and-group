@@ -15,7 +15,7 @@ login_manager.init_app(app)
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    token = request.headers.get('token')
+    token = request.headers.get('X-Auth-Token')
     return login.load_user_from_token(token)
 
 

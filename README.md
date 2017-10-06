@@ -24,7 +24,7 @@ Auth:
 - /login (return a session token) : POST (username, password)
 - /logout : GET *
 
-* add the Header "token: <token-id>" to authenticate
+* add the Header "X-Auth-Token: <token-id>" to authenticate
 ```
 
 
