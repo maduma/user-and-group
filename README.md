@@ -14,7 +14,7 @@ Group
 
 
 User
-- search all ldap users: Get /ldapusers?filter=<username substring>
+- search all ldap users: Get /ldapusers?filter=<username substring> *
 - get all users that belong to a least one group: GET /users
 - get user information (key: uid) : GET /users/<userId>
 - list group that the user belong to : GET /users/<userId>/groups
