@@ -71,6 +71,7 @@ class Users4(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('filter', required=True)
 
+    @login_required
     def get(self):
         args = self.parser.parse_args()
         substring = args['filter']
