@@ -4,7 +4,7 @@ Simple REST service to manage user and group (ldap backend) using Python and Fla
 
 ```
 Group
-- create : PUT /groups *
+- create : PUT /groups/<groupId> *
 - delete (must be empty) : DELETE /groups/<groupdId> *
 - list groups : GET /groups
 - group info : GET /groups/<groupId>
