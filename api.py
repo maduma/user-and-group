@@ -110,5 +110,8 @@ api.add_resource(Logout, '/logout')
 
 if __name__ == '__main__':
     if os.environ.get('PRODUCTION'):
+        if not 'LDAP_MANAGER_PASS' in os.environ:
+            logging.error('LDAP_MANAGER_PASS environment variable not set')
+            os.exit(1)
         app.run(host='0.0.0.0', debug=True)
     app.run(debug=True)
