@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_required, current_user
 import login
 import ldap_backend
 import os
+import sys
 import logging
 
 
@@ -113,6 +114,6 @@ if __name__ == '__main__':
     if os.environ.get('PRODUCTION'):
         if not 'LDAP_MANAGER_PASS' in os.environ:
             logging.error('LDAP_MANAGER_PASS environment variable not set')
-            os.exit(1)
+            sys.exit(1)
         app.run(host='0.0.0.0', debug=True)
     app.run(debug=True)

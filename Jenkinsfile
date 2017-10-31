@@ -26,7 +26,7 @@ pipeline {
         stage('Run Prod Image') {
             steps {
                 sh '[ -z "$( docker ps -qa --filter name=user_and_group )" ] || docker rm -f user_and_group'
-                sh 'docker run -d -p 5000:5000 --restart always --name user_and_group user-and-group:prod'
+                sh 'docker run -e LDAP_MANAGER_PASS=`cat /app/jenkins/etc/ldap.passwd` -d -p 5000:5000 --restart always --name user_and_group user-and-group:prod'
             }
         }
     }
