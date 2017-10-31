@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_required, current_user
 import login
 import ldap_backend
 import os
+import logging
 
 
 app = Flask(__name__)
